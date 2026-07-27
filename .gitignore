@@ -1,0 +1,13 @@
+artifacts/ 
+*.mp4 
+*.exe 
+*.npz 
+*.keras 
+*.joblib 
+*.npy 
+*.log 
+*.tmp 
+git-lfs-*.exe 
+Git-*.exe 
+QuinoaHSIvideo.mp4 
+Git-2.55.0.3-64-bit.exe 
