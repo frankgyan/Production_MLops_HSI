@@ -11,3 +11,8 @@ git-lfs-*.exe
 Git-*.exe 
 QuinoaHSIvideo.mp4 
 Git-2.55.0.3-64-bit.exe 
+"__pycache__/" 
+"*.pyc" 
+"*.xlsx" 
+"*.xls" 
+"stages/LNLP_AVN/" 

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quinoa HSI Classifier | MLOps Pipeline</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: #059669;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #059669, #047857);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #475569;
+            margin-top: 0.5rem;
+        }
+
+        .header .meta {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .header .meta i {
+            margin-right: 0.3rem;
+            color: #059669;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.75rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1.75rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card h2 i {
+            color: #059669;
+            font-size: 1.3rem;
+        }
+
+        .card h2 .emoji {
+            font-size: 1.6rem;
+        }
+
+        /* ===== METRICS GRID ===== */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .metric-box {
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            padding: 1.25rem 1rem;
+            text-align: center;
+        }
+
+        .metric-box .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .metric-box .label {
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 0.2rem;
+        }
+
+        .metric-box.green .value {
+            color: #059669;
+        }
+
+        .metric-box.blue .value {
+            color: #2563eb;
+        }
+
+        .metric-box.purple .value {
+            color: #7c3aed;
+        }
+
+        /* ===== PIPELINE STEPS ===== */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem 0.75rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .pipeline-step {
+            background: #f1f5f9;
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .pipeline-step .num {
+            background: #059669;
+            color: white;
+            border-radius: 9999px;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .pipeline-arrow {
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+
+        /* ===== LIST ===== */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li i {
+            color: #059669;
+            margin-top: 0.2rem;
+            min-width: 1.2rem;
+        }
+
+        .feature-list li strong {
+            color: #0f172a;
+        }
+
+        /* ===== BADGE / TAG ===== */
+        .tag {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #1e293b;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.7rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            margin-right: 0.3rem;
+        }
+
+        .tag.green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tag.blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* ===== LINKS ===== */
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #0f172a;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            border-color: #059669;
+            color: #059669;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .pipeline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pipeline-arrow {
+                transform: rotate(90deg);
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="header">
+            <div class="badge">MLOps Pipeline</div>
+            <h1>🌾 Quinoa HSI Classifier</h1>
+            <p class="subtitle">Hyperspectral Image Classification for Plant Phenotyping</p>
+            <div class="meta">
+                <span><i class="fas fa-database"></i> 5,550 samples</span>
+                <span><i class="fas fa-chart-line"></i> 90.08% test accuracy</span>
+                <span><i class="fas fa-rocket"></i> Production-ready API</span>
+                <span><i class="fas fa-code-branch"></i> MLOps pipeline</span>
+            </div>
+        </header>
+
+        <!-- ===== METRICS ===== -->
+        <div class="card">
+            <h2><span class="emoji">📊</span> Model Performance</h2>
+            <div class="metrics-grid">
+                <div class="metric-box green">
+                    <div class="value">91.30%</div>
+                    <div class="label">Validation Accuracy</div>
+                </div>
+                <div class="metric-box blue">
+                    <div class="value">90.08%</div>
+                    <div class="label">Test Accuracy</div>
+                </div>
+                <div class="metric-box purple">
+                    <div class="value">99.86%</div>
+                    <div class="label">Max Confidence</div>
+                </div>
+                <div class="metric-box green">
+                    <div class="value">4</div>
+                    <div class="label">Classes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PIPELINE ===== -->
+        <div class="card">
+            <h2><span class="emoji">⚙️</span> Pipeline Overview</h2>
+            <div class="pipeline">
+                <span class="pipeline-step"><span class="num">1</span> Data Ingestion</span>
+                <span class="pipeline-arrow"><i class="fas fa-chevron-right"></i></span>
+                <span class="pipeline-step"><span class="num">2</span> Preprocessing</span>
+                <span class="pipeline-arrow"><i class="fas fa-chevron-right"></i></span>
+                <span class="pipeline-step"><span class="num">3</span> Model Training</span>
+                <span class="pipeline-arrow"><i class="fas fa-chevron-right"></i></span>
+                <span class="pipeline-step"><span class="num">4</span> Evaluation</span>
+                <span class="pipeline-arrow"><i class="fas fa-chevron-right"></i></span>
+                <span class="pipeline-step"><span class="num">5</span> Registry</span>
+                <span class="pipeline-arrow"><i class="fas fa-chevron-right"></i></span>
+                <span class="pipeline-step"><span class="num">6</span> Deployment</span>
+            </div>
+
+            <ul class="feature-list" style="margin-top:1.2rem;">
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span><strong>Data:</strong> 5,550 HSI patches (15×15×155) from 4 nutrient conditions</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span><strong>Preprocessing:</strong> Savitzky-Golay smoothing → SNV normalization → PCA (155→20 bands)</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span><strong>Model:</strong> Deep Spectral-Spatial CNN with 123k parameters</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span><strong>Deployment:</strong> FastAPI REST API with automatic preprocessing</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span><strong>Format support:</strong> Raw .tiff and preprocessed .npy files</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ===== CLASSES ===== -->
+        <div class="card">
+            <h2><span class="emoji">🏷️</span> Classes</h2>
+            <div class="metrics-grid">
+                <div class="metric-box" style="background:#dcfce7;">
+                    <div class="value" style="color:#166534;">HNHP</div>
+                    <div class="label">High N, High P<br/><span style="font-size:0.75rem;color:#64748b;">Healthy</span></div>
+                </div>
+                <div class="metric-box" style="background:#fef9c3;">
+                    <div class="value" style="color:#854d0e;">HNLP</div>
+                    <div class="label">High N, Low P</div>
+                </div>
+                <div class="metric-box" style="background:#fed7aa;">
+                    <div class="value" style="color:#9a3412;">LNHP</div>
+                    <div class="label">Low N, High P</div>
+                </div>
+                <div class="metric-box" style="background:#fecaca;">
+                    <div class="value" style="color:#991b1b;">LNLP</div>
+                    <div class="label">Low N, Low P<br/><span style="font-size:0.75rem;color:#64748b;">Severe stress</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TECH STACK ===== -->
+        <div class="card">
+            <h2><span class="emoji">🛠️</span> Technology Stack</h2>
+            <div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.5rem;">
+                <span class="tag green">TensorFlow</span>
+                <span class="tag blue">FastAPI</span>
+                <span class="tag">Uvicorn</span>
+                <span class="tag green">scikit-learn</span>
+                <span class="tag">NumPy</span>
+                <span class="tag blue">SciPy</span>
+                <span class="tag">tifffile</span>
+                <span class="tag green">PCA</span>
+                <span class="tag">Docker</span>
+            </div>
+            <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.6rem;">
+                <span class="tag" style="background:#e0e7ff;color:#1e40af;">MLOps</span>
+                <span class="tag" style="background:#fce7f3;color:#9d174d;">Versioning</span>
+                <span class="tag" style="background:#d1fae5;color:#065f46;">REST API</span>
+            </div>
+        </div>
+
+        <!-- ===== LINKS ===== -->
+        <div class="card" style="text-align:center;">
+            <h2 style="justify-content:center;"><span class="emoji">🔗</span> Explore</h2>
+            <p style="color:#475569;margin-bottom:1rem;">
+                This project is part of an end-to-end MLOps pipeline for hyperspectral image classification.
+            </p>
+            <div class="links" style="justify-content:center;">
+                <a href="#" class="btn btn-primary">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="fas fa-play-circle"></i> Live Demo
+                </a>
+            </div>
+            <p style="margin-top:1rem;font-size:0.85rem;color:#94a3b8;">
+                <i class="fas fa-code"></i> Built with Python, TensorFlow, FastAPI &amp; MLOps principles
+            </p>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="footer">
+            <p>🌾 Quinoa HSI Classifier · 90.08% accuracy · Production-ready</p>
+            <p style="font-size:0.8rem;margin-top:0.3rem;">
+                Made with <i class="fas fa-heart" style="color:#059669;"></i> for plant phenotyping &amp; remote sensing
+            </p>
+        </footer>
+
+    </div>
+
+</body>
+</html>

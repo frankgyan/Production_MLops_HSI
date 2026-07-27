@@ -1,0 +1,88 @@
+# config/production_v2.yaml
+# ============================================================
+# CONFIGURATION FOR NEW DATASET (5,550 SAMPLES)
+# ============================================================
+
+stages:
+  # ==========================================================
+  # STAGE 1: Data Ingestion - NEW DATASET
+  # ==========================================================
+  stage1_ingest:
+    raw_data_source: "C:/Frank/New_folder/Quinoa_dataset-hyper/"
+    output_dir: "./data/raw_staged"
+    artifact_dir: "./artifacts/dataset"
+    label_filename: "quinoa_labels_20260727_153000.xlsx"  # Replace with your actual filename
+    dataset_version: "v2_20260727"
+    use_dvc: false
+    file_extension: ".tiff"
+
+  # ==========================================================
+  # STAGE 2: Preprocessing
+  # ==========================================================
+  stage2_preprocess:
+    artifact_dir: "./artifacts/preprocessed"
+    test_size: 0.15
+    val_size: 0.15
+    random_state: 42
+    preprocessing:
+      savitzky_golay:
+        enabled: true
+        window_length: 9
+        polyorder: 3
+      snv:
+        enabled: true
+      pca:
+        enabled: true
+        n_components: 20
+
+  # ==========================================================
+  # STAGE 3: Model Training (with more data!)
+  # ==========================================================
+  stage3_train:
+    artifact_dir: "./artifacts/model"
+    batch_size: 64                   # Increased for larger dataset
+    epochs: 200
+    learning_rate: 0.001
+    model_types:
+      - "hsi_resnet"
+      - "deep_spectral_spatial"
+      - "spectral_spatial"
+    selection_strategy: "best"
+    use_augmentation: true
+    use_mlflow: false
+
+  # ==========================================================
+  # STAGE 4: Evaluation
+  # ==========================================================
+  stage4_evaluate:
+    artifact_dir: "./artifacts/evaluation"
+    min_accuracy_threshold: 0.75     # Higher threshold for better model
+
+  # ==========================================================
+  # STAGE 5: Model Registry
+  # ==========================================================
+  stage5_register:
+    artifact_dir: "./artifacts/registry"
+    mlflow_tracking_uri: "./mlflow_local"
+    experiment_name: "Quinoa_HSI_V2"
+    registered_model_name: "Quinoa_HSI_Classifier_V2"
+
+  # ==========================================================
+  # STAGE 6: Deployment
+  # ==========================================================
+  stage6_deploy:
+    artifact_dir: "./artifacts/deployment_v2"
+    deployment_target: "local"
+    mlflow_tracking_uri: "./mlflow_local"
+    k8s_namespace: "staging"
+    k8s_deployment_name: "hsi-api-v2"
+
+  # ==========================================================
+  # STAGE 7: Monitoring
+  # ==========================================================
+  stage7_monitor:
+    artifact_dir: "./artifacts/monitoring"
+    drift_threshold: 0.3
+    buffer_size: 100
+    retraining_webhook: "http://localhost:8080/trigger_retraining"
+    check_interval_seconds: 3600

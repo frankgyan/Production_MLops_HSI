@@ -1,0 +1,51 @@
+name: MLOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-train:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run Stage 1 - Data Ingestion
+      run: python stages/stage1_ingest.py --config config/production.yaml
+    
+    - name: Run Stage 2 - Preprocessing
+      run: python stages/stage2_preprocess.py --config config/production.yaml
+    
+    - name: Run Stage 3 - Model Training
+      run: python stages/stage3_train.py --config config/production.yaml
+    
+    - name: Run Stage 4 - Evaluation
+      run: python stages/stage4_evaluate.py --config config/production.yaml
+    
+    - name: Check if model passes validation
+      id: check_validation
+      run: |
+        STATUS=$(cat artifacts/evaluation/validation_status.txt)
+        if [ "$STATUS" != "PASSED" ]; then
+          echo "Model validation failed!"
+          exit 1
+        fi
+        echo "Model validation passed!"
+    
+    - name: Run Stage 5 - Registry
+      run: python stages/stage5_register_local.py --config config/production.yaml
+    
+    - name: Run Stage 6 - Deployment
+      run: python stages/stage6_deploy.py --config config/production.yaml

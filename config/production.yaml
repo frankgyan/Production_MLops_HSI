@@ -1,0 +1,71 @@
+# config/production.yaml
+# ============================================================
+# FINAL CONFIG WITH VEGETATION INDICES + PCA
+# ============================================================
+
+# config/production_v2.yaml
+
+stages:
+  stage1_ingest:
+    raw_data_source: "C:/Frank/New_folder/Quinoa_dataset-hyper/stages/"
+    output_dir: "./data/raw_staged"
+    artifact_dir: "./artifacts/dataset"
+    label_filename: "new_quinoa_labels.xlsx"  # Created by the script
+    dataset_version: "v2_20260727"
+    use_dvc: false
+    file_extension: ".tiff"
+
+  stage2_preprocess:
+    artifact_dir: "./artifacts/preprocessed"
+    test_size: 0.20
+    val_size: 0.20
+    random_state: 42
+    preprocessing:
+      savitzky_golay:
+        enabled: true
+        window_length: 9
+        polyorder: 3
+      snv:
+        enabled: true
+      vegetation_indices:
+        enabled: false                    # 👈 NEW: Calculate vegetation indices
+      pca:
+        enabled: true
+        n_components: 20                 # Reduce 155 -> 20 bands
+
+  stage3_train:
+    artifact_dir: "./artifacts/model"
+    batch_size: 32
+    epochs: 200
+    learning_rate: 0.001
+    model_types:
+      - "deep_spectral_spatial"
+      - "hsi_cnn"
+      - "spectral_spatial"
+    selection_strategy: "best"
+    use_augmentation: true
+    use_mlflow: false
+
+  stage4_evaluate:
+    artifact_dir: "./artifacts/evaluation"
+    min_accuracy_threshold: 0.60
+
+  stage5_register:
+    artifact_dir: "./artifacts/registry"
+    mlflow_tracking_uri: "http://localhost:5000"
+    experiment_name: "Quinoa_HSI_Classification"
+    registered_model_name: "Quinoa_HSI_Classifier"
+
+  stage6_deploy:
+    artifact_dir: "./artifacts/deployment"
+    deployment_target: "local"
+    mlflow_tracking_uri: "http://localhost:5000"
+    k8s_namespace: "staging"
+    k8s_deployment_name: "hsi-api"
+
+  stage7_monitor:
+    artifact_dir: "./artifacts/monitoring"
+    drift_threshold: 0.3
+    buffer_size: 100
+    retraining_webhook: "http://localhost:8080/trigger_retraining"
+    check_interval_seconds: 3600
